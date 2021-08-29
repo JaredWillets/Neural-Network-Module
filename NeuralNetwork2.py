@@ -32,7 +32,7 @@ class NeuralNetwork:
             for neuronNumber, neuron in enumerate(layer):
                 for weightNumber, weight in enumerate(neuron['weights']):
                     neuron['output'] += weight*inputs[weightNumber]
-                    neuron['output'] = 1/(1+(math.e**(-float(neuron['output']))))
+                    neuron['output'] = 1/(1+(euler**(-float(neuron['output']))))
                     newInputs.append(neuron['output'])
             inputs = newInputs
         outputs = inputs
@@ -53,7 +53,7 @@ class NeuralNetwork:
                     for neuronNumber, neuron in enumerate(layer):
                         for weightNumber, weight in enumerate(neuron['weights']):
                             neuron['output'] += weight*inputs[weightNumber]
-                            neuron['output'] = 1/(1+(math.e**(-float(neuron['output']))))
+                            neuron['output'] = 1/(1+(euler**(-float(neuron['output']))))
                             newInputs.append(neuron['output'])
                     inputs = newInputs
                 outputs = inputs
