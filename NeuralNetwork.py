@@ -1,6 +1,6 @@
 import json
 from random import random as rand
-from math import euler
+from math import e as euler
 class NeuralNetwork:
     def __init__(self,structure):
         self.sumError = float()
@@ -47,7 +47,10 @@ class NeuralNetwork:
             self.sumError = 0
             self.iterationNumber += 1
             for dataNumber, data in enumerate(dataset):
-                inputs = data
+                inputs = data[:-2]
+                for inputValue in inputs:
+                    print(inputValue)
+                    inputValue = float(inputValue)
                 newInputs = []
                 for layerNumber, layer in enumerate(self.network[1:]):
                     for neuronNumber, neuron in enumerate(layer):
@@ -68,7 +71,7 @@ class NeuralNetwork:
                             neuron['error'] *= neuron['output']*(1-neuron['output'])
                     else:
                         for neuronNumber, neuron in layer:
-                            neuron['error'] = expected[neuronNumber]-neuron['output']*output*(1-output)
+                            neuron['error'] = expected[neuronNumber]-neuron['output']*neuron['output']*(1-neuron['output'])
                 for layerNumber, layer in enumerate(self.network):
                     inputs = data
                     if layerNumber == 0:
@@ -84,3 +87,6 @@ class NeuralNetwork:
                 print(f'Iteration: {self.iterationNumber}\t Error: {self.sumError}')
     def getError(self):
         return self.sumError
+
+network = NeuralNetwork([2,3,2])
+network.trainNetwork(100, 0.6, [[0,0,[1,0]],[1,1,[1,0]],[0,1,[0,1]],[1,0,[0,1]]], noOut = True)
