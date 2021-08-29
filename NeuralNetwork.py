@@ -47,14 +47,16 @@ class NeuralNetwork:
             self.sumError = 0
             self.iterationNumber += 1
             for dataNumber, data in enumerate(dataset):
-                inputs = data[:-2]
+                inputs = data[:-1]
                 for inputValue in inputs:
                     print(inputValue)
                     inputValue = float(inputValue)
                 newInputs = []
                 for layerNumber, layer in enumerate(self.network[1:]):
                     for neuronNumber, neuron in enumerate(layer):
-                        for weightNumber, weight in enumerate(neuron['weights']):
+                        print(len(neuron['weights']))
+                        print(len(inputs))
+                        for weightNumber, weight in enumerate(neuron['weights'][:-1]):
                             neuron['output'] += weight*inputs[weightNumber]
                             neuron['output'] = 1/(1+(euler**(-float(neuron['output']))))
                             newInputs.append(neuron['output'])
@@ -63,7 +65,7 @@ class NeuralNetwork:
                 expected = data[-1]
                 for expectedNumber, expectedValue in enumerate(expected):
                     self.sumError += (expectedValue-outputs[expectedNumber])**2
-                for layerNummber, layer in reversed(enumerate(self.network)):
+                for layerNummber, layer in enumerate(reversed(self.network)):
                     if layerNumber != len(self.network)-1:
                         for neuronNumber, neuron in enumerate(layer):
                             for nextlayerNeuronNumber, nextLayerNeuron in enumerate(self.network[layerNumber]):
@@ -80,7 +82,7 @@ class NeuralNetwork:
                         for neuron in self.network[layerNumber-1]:
                             inputs.append(neuron['output'])
                     for neuronNumber, neuron in enumerate(layer):
-                        for inputNumber, inputValue in enumerate(inputs[:-2]):
+                        for inputNumber, inputValue in enumerate(inputs[:-1]):
                             neuron['weights'][inputNumber] += (neuron['error']*float(learnRate))*float(inputValue)
                         neuron['weights'][-1] += neuron['error']*learnRate
             if print_out:
