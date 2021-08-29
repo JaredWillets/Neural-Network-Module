@@ -1,116 +1,86 @@
 import json
 from random import random as rand
+from math import euler
 class NeuralNetwork:
-    trained = False
-    iterationNumber = 0
-    errorSave = float()
-    SumError = float()
-    def __init__(self, structure):
-        if not isinstance(structure, list):
-            raise TypeError('Structure needs to be a list!')
-        NeuralNetwork.network = list()
-        for layerNumber in range(1,len(structure)):
+    def __init__(self,structure):
+        self.sumError = float()
+        self.network = []
+        self.trained = False
+        self.iterationNumber = 0
+        self.structure = structure
+        for layerNumber, layer in enumerate(structure[1:]):
             newLayer = []
-            for neuronNumber in range(structure[layerNumber]):
-                weights = []
-                for weightNumber in range(structure[layerNumber-1]+1):
-                    weights.append(rand())
-                neuron = {}
-                neuron['weights'] = weights
+            for neuronNumber in range(layer):
+                neuron = dict()
+                neuron['weights'] = [rand() for x in range(structure[layerNumber-1]+1)]
                 neuron['error'] = float()
                 neuron['output'] = float()
                 newLayer.append(neuron)
-            NeuralNetwork.network.append(newLayer)
-    def trainNetwork(self, iterations, learnRate, dataset, noOut):
-        if isinstance(iterations, int) == False or iterations < 1:
-            raise ValueError('The number of iterations must be a positive integer!')
-        NeuralNetwork.trained = True
-        def activateNeuron(weights, inputs):
-            output = weights[-1]            
-            for weightNumber in range(len(weights)-1):
-                output += float(weights[weightNumber])*float(inputs[weightNumber])
-            return output
-        def transfer(activationValue):
-            return 1/(1+(2.7182818284590452353602874713527**(-float(activationValue))))
-        def forwardPropagation(data):
-            inputs = data
-            for layer in NeuralNetwork.network:
-                newInputs = []
-                for neuron in layer:
-                    activation = activateNeuron(neuron['weights'], inputs)
-                    neuron['output'] = transfer(activation)
+            self.network.append(newLayer)
+    def importNetwork(self, directory, **kwargs):
+        json.load(open(f"{directory}.neural",'r'))
+    def exportNetwork(self, directory, **kwargs):
+        with open(f'{directory}.neural','w') as file:
+            json.dump(self.network, file)
+            file.close()
+    def predict(self, data, **kwargs):
+        if 'print_out' in kwargs:
+            print_out = True
+        inputs = data
+        newInputs = []
+        for layerNumber, layer in enumerate(self.network[1:]):
+            for neuronNumber, neuron in enumerate(layer):
+                for weightNumber, weight in enumerate(neuron['weights']):
+                    neuron['output'] += weight*inputs[weightNumber]
+                    neuron['output'] = 1/(1+(euler**(-float(neuron['output']))))
                     newInputs.append(neuron['output'])
-                inputs = newInputs
-            return inputs
-        def transferDerivative(output):
-            return output*(1-output)
-        def errorBackwardPropagation(expected):
-            for layerNumber in reversed(range(len(NeuralNetwork.network))):
-                layer = NeuralNetwork.network[layerNumber]
-                if layerNumber != len(NeuralNetwork.network)-1:
-                    for neuronNumber in range(len(layer)):
-                        for neuron in NeuralNetwork.network[layerNumber+1]:
-                            NeuralNetwork.network[layerNumber][neuronNumber]['error'] += neuron['weights'][neuronNumber]*neuron['error']
-                        NeuralNetwork.network[layerNumber][neuronNumber]['error'] = NeuralNetwork.network[layerNumber][neuronNumber]['error']*transferDerivative(NeuralNetwork.network[layerNumber][neuronNumber]['output'])
-                else:
-                    for neuronNumber in range(len(layer)):
-                        neuron = layer[neuronNumber]
-                        neuron['error'] = (expected[neuronNumber]-neuron['output'])*transferDerivative(neuron['output'])
-        def updateWeights(data, learnRate):
-            for layerNumber in range(len(NeuralNetwork.network)):
-                inputs = []
-                if layerNumber != 0:
-                    for neuron in NeuralNetwork.network[layerNumber-1]:
-                        inputs.append(neuron['output'])
-                else:
-                    inputs = data
-                layer = NeuralNetwork.network[layerNumber]
-                for neuronNumber in range(len(layer)):
-                    neuron = layer[neuronNumber]
-                    for inputNumber in range(len(inputs)-1):
-                        neuron['weights'][inputNumber] = float(neuron['weights'][inputNumber]) + (float(learnRate)*float(neuron['error'])*float(inputs[inputNumber]))
-                    neuron['weights'][-1] += neuron['error']*learnRate
-        for iteration in range(iterations):
-            NeuralNetwork.SumError = 0
-            NeuralNetwork.iterationNumber += 1
-            for data in dataset:
-                outputs = forwardPropagation(data)
-                expected = []
-                expected = data[-1]
-                for expectedNumber in range(len(expected)):
-                    NeuralNetwork.SumError += (expected[expectedNumber]-outputs[expectedNumber])**2
-                errorBackwardPropagation(expected)
-                updateWeights(data, learnRate)
-            if noOut == False:
-                continue
-            if noOut == True:
-                print('Iteration: '+str(NeuralNetwork.iterationNumber)+', Error: '+str(NeuralNetwork.SumError))
-        NeuralNetwork.trained = True
-    def predict(self, data):
-        def activateNeuron(weights, inputs):
-            output = weights[-1]
-            for weightNumber in range(len(weights)-1):
-                output += weights[weightNumber]*inputs[weightNumber]
-            return output
-        def transfer(activationValue):
-            return 1/(1+(2.7182818284590452353602874713527**(-float(activationValue))))
-        def forwardPropagation(data):
-            inputs = data
-            for layer in NeuralNetwork.network:
-                newInputs = []
-                for neuron in layer:
-                    activation = activateNeuron(neuron['weights'], inputs)
-                    neuron['output'] = transfer(activation)
-                    newInputs.append(neuron['output'])
-                inputs = newInputs
-            return inputs
-        outputs = forwardPropagation(data)
+            inputs = newInputs
+        outputs = inputs
+        if print_out:
+            print(outputs)
         return outputs
-    def exportNetwork(self, directory):
-        networkFile = open(directory+'.neural', 'w')
-        json.dump(self.network, networkFile)
-        networkFile.close()
-    def importNetwork(self, directory):
-        NeuralNetwork.network = json.load(open(directory+'.neural', 'r'))
+    def trainNetwork(self, iterations, learnRate, dataset, **kwargs):
+        if 'noOut' in kwargs:
+            if kwargs['noOut']:
+                print_out = True
+        for iteration in range(iterations):
+            self.sumError = 0
+            self.iterationNumber += 1
+            for dataNumber, data in enumerate(dataset):
+                inputs = data
+                newInputs = []
+                for layerNumber, layer in enumerate(self.network[1:]):
+                    for neuronNumber, neuron in enumerate(layer):
+                        for weightNumber, weight in enumerate(neuron['weights']):
+                            neuron['output'] += weight*inputs[weightNumber]
+                            neuron['output'] = 1/(1+(euler**(-float(neuron['output']))))
+                            newInputs.append(neuron['output'])
+                    inputs = newInputs
+                outputs = inputs
+                expected = data[-1]
+                for expectedNumber, expectedValue in enumerate(expected):
+                    self.sumError += (expectedValue-outputs[expectedNumber])**2
+                for layerNummber, layer in reversed(enumerate(self.network)):
+                    if layerNumber != len(self.network)-1:
+                        for neuronNumber, neuron in enumerate(layer):
+                            for nextlayerNeuronNumber, nextLayerNeuron in enumerate(self.network[layerNumber]):
+                                neuron['error'] += nextLayerNeuron['weights'][neuronNumber]*nextLayerNeuron['error']
+                            neuron['error'] *= neuron['output']*(1-neuron['output'])
+                    else:
+                        for neuronNumber, neuron in layer:
+                            neuron['error'] = expected[neuronNumber]-neuron['output']*output*(1-output)
+                for layerNumber, layer in enumerate(self.network):
+                    inputs = data
+                    if layerNumber == 0:
+                        inputs = data
+                    else:
+                        for neuron in self.network[layerNumber-1]:
+                            inputs.append(neuron['output'])
+                    for neuronNumber, neuron in enumerate(layer):
+                        for inputNumber, inputValue in enumerate(inputs[:-2]):
+                            neuron['weights'][inputNumber] += (neuron['error']*float(learnRate))*float(inputValue)
+                        neuron['weights'][-1] += neuron['error']*learnRate
+            if print_out:
+                print(f'Iteration: {self.iterationNumber}\t Error: {self.sumError}')
     def getError(self):
-        return self.SumError
+        return self.sumError
