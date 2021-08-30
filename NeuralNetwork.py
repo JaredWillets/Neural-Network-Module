@@ -40,8 +40,11 @@ class NeuralNetwork:
             print(outputs)
         return outputs
     def trainNetwork(self, iterations, learnRate, dataset, **kwargs):
+        print_out = False
         if 'noOut' in kwargs:
             if kwargs['noOut']:
+                print_out = False
+            else:
                 print_out = True
         for iteration in range(iterations):
             self.sumError = 0
@@ -49,13 +52,10 @@ class NeuralNetwork:
             for dataNumber, data in enumerate(dataset):
                 inputs = data[:-1]
                 for inputValue in inputs:
-                    print(inputValue)
                     inputValue = float(inputValue)
                 newInputs = []
                 for layerNumber, layer in enumerate(self.network[1:]):
                     for neuronNumber, neuron in enumerate(layer):
-                        print(len(neuron['weights']))
-                        print(len(inputs))
                         for weightNumber, weight in enumerate(neuron['weights'][:-1]):
                             neuron['output'] += weight*inputs[weightNumber]
                             neuron['output'] = 1/(1+(euler**(-float(neuron['output']))))
@@ -65,17 +65,20 @@ class NeuralNetwork:
                 expected = data[-1]
                 for expectedNumber, expectedValue in enumerate(expected):
                     self.sumError += (expectedValue-outputs[expectedNumber])**2
-                for layerNummber, layer in enumerate(reversed(self.network)):
-                    if layerNumber != len(self.network)-1:
+                ## Error backward propagation
+                for layerNumber, layer in reversed(list(enumerate(self.network))):
+                    if layerNumber == len(self.network)-1:
                         for neuronNumber, neuron in enumerate(layer):
-                            for nextlayerNeuronNumber, nextLayerNeuron in enumerate(self.network[layerNumber]):
+                            
+                            neuron['error'] = (expected[neuronNumber]-neuron['output'])*(neuron['output']*(1-neuron['output']))
+                    else:
+                        for neuronNumber, neuron in enumerate(layer):
+                            for nextlayerNeuronNumber, nextLayerNeuron in enumerate(self.network[layerNumber+1]):
                                 neuron['error'] += nextLayerNeuron['weights'][neuronNumber]*nextLayerNeuron['error']
                             neuron['error'] *= neuron['output']*(1-neuron['output'])
-                    else:
-                        for neuronNumber, neuron in layer:
-                            neuron['error'] = expected[neuronNumber]-neuron['output']*neuron['output']*(1-neuron['output'])
+                ## Updates the weights
                 for layerNumber, layer in enumerate(self.network):
-                    inputs = data
+                    inputs = []
                     if layerNumber == 0:
                         inputs = data
                     else:
@@ -83,12 +86,21 @@ class NeuralNetwork:
                             inputs.append(neuron['output'])
                     for neuronNumber, neuron in enumerate(layer):
                         for inputNumber, inputValue in enumerate(inputs[:-1]):
-                            neuron['weights'][inputNumber] += (neuron['error']*float(learnRate))*float(inputValue)
+                            print('new')
+                            print(neuron['weights'][inputNumber])
+                            neuron['weights'][inputNumber] += neuron['error']*float(learnRate)*float(inputValue)
+                            print(inputValue)
+                            print(learnRate)
+                            print(neuron['error'])
+                            # print(neuron['error']*float(learnRate)*float(inputValue))
+                            print(neuron['weights'][inputNumber])
+                            # if inputValue != float(0):
+                            #     print('HHHHHHHHHHHHHHHHHEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRRRRRRREEEEEEEEEEEEEEEEEEEE')
                         neuron['weights'][-1] += neuron['error']*learnRate
             if print_out:
                 print(f'Iteration: {self.iterationNumber}\t Error: {self.sumError}')
     def getError(self):
         return self.sumError
 
-network = NeuralNetwork([2,3,2])
-network.trainNetwork(100, 0.6, [[0,0,[1,0]],[1,1,[1,0]],[0,1,[0,1]],[1,0,[0,1]]], noOut = True)
+network = NeuralNetwork([2,3,3,2])
+network.trainNetwork(100, 0.3, [[0,0,[1,0]],[1,1,[0,1]],[0,1,[1,0]],[1,0,[1,0]]], noOut = False)
