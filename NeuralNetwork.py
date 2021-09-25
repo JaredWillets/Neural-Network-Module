@@ -105,9 +105,3 @@ class NeuralNetwork:
                 print(f'Iteration: {self.iterationNumber}\t Error: {self.sumError}')
     def getError(self):
         return self.sumError
-
-network = NeuralNetwork([2,3,3,2])
-print(network.network)
-network.trainNetwork(100000, 0.3, [[0,0,[1,0]],[1,1,[0,1]],[0,1,[1,0]],[1,0,[1,0]]], noOut = False)
-output = network.predict([1,1])
-print(output.index(max(output)))
