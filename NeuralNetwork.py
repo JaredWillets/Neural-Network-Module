@@ -21,7 +21,7 @@ class NeuralNetwork:
                 neuron['output'] = float()
                 newLayer.append(neuron)
             NeuralNetwork.network.append(newLayer)
-    def trainNetwork(self, iterations, learnRate, dataset, noOut):
+    def trainNetwork(self, iterations, learnRate, dataset, noOut = True):
         if isinstance(iterations, int) == False or iterations < 1:
             raise ValueError('The number of iterations must be a positive integer!')
         NeuralNetwork.trained = True
@@ -107,10 +107,10 @@ class NeuralNetwork:
         outputs = forwardPropagation(data)
         return outputs
     def exportNetwork(self, directory):
-        networkFile = open(directory+'.neural', 'w')
-        json.dump(self.network, networkFile)
-        networkFile.close()
+        with open(directory, 'w') as networkFile:
+            networkFile = open(directory, 'w')
+            json.dump(self.network, networkFile)
     def importNetwork(self, directory):
-        NeuralNetwork.network = json.load(open(directory+'.neural', 'r'))
+        NeuralNetwork.network = json.load(open(directory, 'r'))
     def getError(self):
         return self.SumError
