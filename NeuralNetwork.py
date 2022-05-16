@@ -1,13 +1,13 @@
 import json
-from random import random as rand
 from math import e as euler
-import os
-import asyncio
-import sys
+from random import random as rand
+# import asyncio
+# import os
+# import sys
 
 
 class NeuralNetwork:
-    def __init__(self, structure):
+    def __init__(self, structure, random=False):
         self.sumError = float()
         self.network = []
         self.trained = False
@@ -19,9 +19,15 @@ class NeuralNetwork:
                 neuron = dict()
 
                 if layerNumber != len(structure)-1:
-                    neuron['weights'] = [0.5 for x in range(structure[layerNumber-1]+1)]
+                    if not random:
+                        neuron['weights'] = [0.5 for x in range(structure[layerNumber-1]+1)]
+                    else:
+                        neuron['weights'] = [rand() for x in range(structure[layerNumber-1]+1)]
                 else:
-                    neuron['weights'] = [0.5 for x in range(structure[layerNumber-1])]
+                    if not random:
+                        neuron['weights'] = [0.5 for x in range(structure[layerNumber-1])]
+                    else:
+                        neuron['weights'] = [rand() for x in range(structure[layerNumber-1])]
                 neuron['error'] = float()
                 neuron['output'] = float()
                 newLayer.append(neuron)
@@ -72,7 +78,6 @@ class NeuralNetwork:
                             neuron['output'] += weight*inputs[weightNumber]
                         neuron['output'] = 1 / (1+(euler**(-float(neuron['output']))))
                         newInputs.append(neuron['output'])
-                    print(newInputs)
                     inputs = newInputs
                     newInputs = []
                 outputs = inputs
@@ -116,13 +121,17 @@ class NeuralNetwork:
 
 
 if __name__ == "__main__":
-    network = NeuralNetwork([2, 3, 2])
+    network = NeuralNetwork([2, 3, 3, 2], True)
     dataset = [
         [0, 0, (1, 0)],
         [0, 1, (1, 0)],
         [1, 0, (1, 0)],
         [1, 1, (0, 1)]
     ]
-    network.trainNetwork(1000, 0.6, dataset)
-    print(network.predict([0, 0]))
+
+
+    network.trainNetwork(10000, 0.5, dataset, True)
     print(network.network)
+    # network.trainNetwork(1, 0.5, dataset, True)
+    # print(network.network)
+    print(network.predict((1,1)))
