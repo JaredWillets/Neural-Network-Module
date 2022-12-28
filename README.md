@@ -43,10 +43,11 @@ For logging and statistics, the `getError()` function is included and is used li
 
 ### Features coming soon:
 
-- JavaScript Version
-- Reward System
-- Memory System
-- Compressed Network
+- Q-Learning System
+- Easy Adversarial Networks
+- More multithreading optimization
+- Javascript version of RAMSaverNetwork
+- More documentation coming soon at http://docs.terminotech.com/Neural-Network-Module (does not work yet)
 
 
 If you have any questions or suggestions and don't want to go through GitHub, you can reach me at willetsjared@gmail.com.
