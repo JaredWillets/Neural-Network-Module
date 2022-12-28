@@ -1,8 +1,8 @@
-import json
-from math import e as euler
-from random import random as rand
-import threading
-import time
+import json ## Used for easy loading and saving into the neural networks
+from math import e as euler ## eulers number used for the forward propagation algorithm
+from random import random as rand ## Random number generation for the start of the neural network
+import threading ## Used to add multithreading to the neural network
+import time ## To give the user information about neural network run time
 
 class NeuralNetwork:
 	def __init__(self, structure, random=False):
@@ -57,7 +57,6 @@ class NeuralNetwork:
 		return outputs
 
 	def trainNetwork(self, iterations: int, learnRate: float, dataset:list, out=True):
-		# previousError = 50000000
 		print_out = out ## Sets whether or not the iteration statement will be printed
 		for iteration in range(iterations):
 			self.sumError = 0
@@ -124,14 +123,10 @@ class RAMSaverNeuralNetwork:
 		self.iterationNumber = 0
 		self.structure = structure
 		self.currentlySaving = []
-		self.stage1Iteration = 0
-		self.stage2Iteration = 0
-		self.stage3Iteration = 0
 		self.laodedArray = []
 		self.asynchronousBackwardPropagation = False
 		try:os.mkdir(name)
 		except:pass
-		logging.basicConfig(filename='test.log', level=logging.DEBUG)
 		for layerNumber, layer in enumerate(structure[1:]):
 			try:os.mkdir(name+"/Layer"+str(layerNumber))
 			except:pass
@@ -210,13 +205,13 @@ class RAMSaverNeuralNetwork:
 				
 				# Starting the forward propagation section (Changing output)
 				self.forwardPropagateThread(data)
-				# threading.Thread(target = forwardPropagateThread, args = (self,data))
+
 				# Error backward propagation (Changing error)
 				self.backwardPropagationThread()
-				# threading.Thread(target = backwardPropagationThread, args = (self))
+
 				# Weight updating (Changing weights)
 				self.updateWeightsThread(learnRate, data)
-				# threading.Thread(target = updateWeghtsThread, args=(self,learnRate, data))
+			
 			endTime = time.time()
 			if print_out:
 				print('Iteration: '+str(self.iterationNumber)+'\t Error: '+str(self.sumError)+"\t Time: "+str(endTime-startTime)+"\t Total Time: "+str(endTime-totalStartTime))
@@ -226,7 +221,6 @@ class RAMSaverNeuralNetwork:
 		return self.sumError
 
 	def updateWeightsThread(self, learnRate, data):
-		# Updates the weights (Changing weights)
 		for layerNumber in range(len(self.network)):
 			inputs = []
 			if layerNumber != 0:
@@ -246,7 +240,6 @@ class RAMSaverNeuralNetwork:
 				neuron['weights'][-1] += neuron['error']*learnRate
 				if neuron != testNeuron and neuronDir == "newNet/Layer1/0.neuron":
 					self.saveNeuron(neuronDir, neuron)
-		self.stage3Iteration += 1
 	def forwardPropagateThread(self, data):
 		inputs = data[:-1]
 		for inputValue in inputs:
@@ -269,7 +262,6 @@ class RAMSaverNeuralNetwork:
 		for expectedNumber, expectedValue in enumerate(expected):
 			self.sumError += (expectedValue-outputs[expectedNumber])**2
 		self.expected = expected
-		self.stage1Iteration +=1
 	
 	def backPropagationNeuronThread(self, layerNumber, neuronNumber):
 		tempNeuron = self.getNeuron(self.network[layerNumber][neuronNumber])
@@ -303,5 +295,4 @@ class RAMSaverNeuralNetwork:
 					neuron['error'] = (
 						self.expected[neuronNumber]-neuron['output'])*(neuron['output']*(1-neuron['output']))
 					self.saveNeuron(neuronDir, neuron)
-		self.stage2Iteration += 1
 	
