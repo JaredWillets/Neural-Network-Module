@@ -41,13 +41,11 @@ For logging and statistics, the `getError()` function is included and is used li
 
 `network.getError()`
 
-### Features coming soon:
+### Still in development:
 
-- Q-Learning System
-- Easy Adversarial Networks
-- More multithreading optimization
-- Javascript version of RAMSaverNetwork
-- More documentation coming soon at http://docs.terminotech.com/Neural-Network-Module (does not work yet)
+- Finishing Rust Neural Network System
+- Remake RAMSaverNeuralNetwork system for much greater efficiency
+- Horizontal scaling options
 
 
 If you have any questions or suggestions and don't want to go through GitHub, you can reach me at willetsjared@gmail.com.
