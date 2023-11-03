@@ -146,19 +146,3 @@ class NeuralNetwork {
         return this.sumError
     }
 }
-
-let test = ['a','b','c']
-let network = new NeuralNetwork([2, 3, 3, 2], true)
-let dataset = [
-    [0,0,[1,0]],
-    [1,1,[0,1]],
-    [0,1,[0,1]],
-    [1,0,[0,1]]
-]
-
-
-network.trainNetwork(10000, 0.5, dataset, true)
-console.log(JSON.stringify(network.network))
-// network.trainNetwork(1, 0.5, dataset, true)
-// console.log(JSON.stringify(network.network))
-console.log(network.predict([1,1]))
